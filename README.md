@@ -1,2 +1,2 @@
-# rektraf-M-M-m
-pe
+# Rektraf-M-M-m
+Pake python
