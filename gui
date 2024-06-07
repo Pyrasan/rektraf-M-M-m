@@ -1,0 +1,57 @@
+import math
+
+def mm_m_queue(lam, mu, m):
+    rho = lam / (m * mu)  # Tingkat intensitas fasilitas pelayanan
+    if rho >= 1:
+        raise ValueError("Sistem tidak stabil, pastikan λ < m * μ")
+    
+    def prob_0():
+        summation = sum((lam / mu) ** n / math.factorial(n) for n in range(m))
+        last_term = (lam / mu) ** m / (math.factorial(m) * (1 - rho))
+        return 1 / (summation + last_term)
+    
+    P0 = prob_0()  # Probabilitas tidak ada pelanggan dalam sistem
+    
+    def prob_n(n):
+        if n <= m:
+            return (P0 * (lam / mu) ** n) / (math.factorial(n))
+        else:
+            return (P0 * m ** m * (rho) ** n) / (math.factorial(m))
+    
+    def Lq():
+        return (P0 * (lam / mu) ** m * rho) / (math.factorial(m) * (1 - rho) ** 2)
+    
+    def Ls():
+        return Lq() + lam / mu
+    
+    def Wq():
+        return Lq() / lam
+    
+    def Ws():
+        return Wq() + 1 / mu
+    
+    return {
+        "Tingkat Intensitas Fasilitas Pelayanan (ρ)": rho,
+	"Probablitias Sistem Idle (P0)": P0,
+        "Probabilitas Kepastian n Pelanggan dalam Sistem (Pn)": prob_n,
+        "Jumlah Pelanggan yang Diharapkan Menunggu dalam Antrian (Lq)": math.ceil(Lq()),
+        "Jumlah Rata-rata Pelanggan Menunggu dalam Sistem (Ls)": math.ceil(Ls()),
+        "Waktu yang Diharapkan Pelanggan dalam Antrian (Wq)": Wq(),
+        "Waktu yang Diharapkan Pelanggan dalam Sistem (Ws)": Ws(),
+    }
+
+# Input data
+lam = float(input("Masukkan laju kedatangan (λ): "))
+mu = float(input("Masukkan laju pelayanan (μ): "))
+m = int(input("Masukkan jumlah server (m): "))
+
+# Hitung metrik antrian
+result = mm_m_queue(lam, mu, m)
+
+# Tampilkan hasil
+for k, v in result.items():
+    if callable(v):
+        n = int(input(f"Masukkan jumlah pelanggan (n) untuk menghitung {k}: "))
+        print(f"{k} untuk {n} pelanggan: {v(n):.4f}")
+    else:
+        print(f"{k}: {v:.4f}")
